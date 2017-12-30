@@ -7,7 +7,7 @@ gems: [jekyll-paginate]
 paginate: 100
 paginate_path: "page:num"
 name: 走累了的猫
-description: 走累了的猫 | ZLLDM 2017
+description: 走累了的猫 | ZLLDM 2018
 author: zlldm
 email: i(at)zlldm.com
 duoshuo: zlldm

@@ -9,7 +9,7 @@ tags: 2021, Manjaro, MindMaster
 
 按以下步骤：
 
-    sudo debtap /xxx/mindmaster_8.5.2_cn.x86_64.deb
+    sudo debtap mindmaster_8.5.2_cn.x86_64.deb
 
 双击生成的 pkg.tar.zst 包安装。
 

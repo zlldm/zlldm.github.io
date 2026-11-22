@@ -13,6 +13,13 @@
 @import url(http://fonts.googleapis.com/css?family=Electrolize);
 @import url(http://fonts.googleapis.com/css?family=Cuprum);
 */
+/* 禁止 iOS Safari 竖屏时的字体自动放大（Text Autosizing），
+   否则文字会被撑大、一行显示不全，需手动缩放才能看全。 */
+html{
+  -webkit-text-size-adjust:100%;
+  -ms-text-size-adjust:100%;
+  text-size-adjust:100%;
+}
 body{font-size:14px;word-spacing:1px;
         margin-left:auto;
 margin-right:auto;

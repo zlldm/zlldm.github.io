@@ -4,7 +4,7 @@ url: https://www.zlldm.com
 #highlighter: pygments
 highlighter: rouge
 gems: [jekyll-paginate, jekyll-feed]
-paginate: 100
+paginate: 10
 paginate_path: "page:num"
 name: 走累了的猫
 description: 走累了的猫 | ZLLDM 2018

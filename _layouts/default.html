@@ -1,7 +1,7 @@
 <!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="zh-CN" lang="zh-CN">
+<html lang="zh-CN">
   <head>
-    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="author" content="{{ site.author }}" />
     <title>{% if page.path == 'index.html' %}{{ site.name }}{% else %}{% unless page.id %}{{ site.name }} - {% endunless %}{{ page.title }}{% endif %}</title>
@@ -10,7 +10,6 @@
     <link href="/feed.xml" rel="alternate" title="{{ site.name }}" type="application/atom+xml" />
     <link rel="stylesheet" href="/media/css/style.css" />
     <link rel="stylesheet" href="/media/css/highlight.css" media="all"/>
-    <script type="text/javascript" src="/media/js/jquery-1.7.1.min.js"></script>
     {% if site.google_analytics %}
     <script async src="https://www.googletagmanager.com/gtag/js?id={{ site.google_analytics }}"></script>
     <script>
@@ -24,9 +23,11 @@
   <body>
     <div id="container">
       <div id="main" role="main">
+        {% unless page.path == 'index.html' %}
         <header>
           <h1>{{ page.title }}</h1>
         </header>
+        {% endunless %}
         <nav>
           <span><a title="首页" class="" href="/">首页</a></span>
           <span><a title="分类" class="" href="/categories/">分类</a></span>
@@ -41,7 +42,7 @@
 
       <footer>
         <p><small>
-            <a rel="license" href="http://creativecommons.org/licenses/by-sa/3.0/cn/" target="_blank" title="许可协议">©</a> 2006 - {{site.time | date:"%Y"}} <a href="/">{{ site.sitedomain }}</a>
+            <a rel="license" href="https://creativecommons.org/licenses/by-sa/3.0/cn/" target="_blank" title="许可协议">©</a> 2006 - {{site.time | date:"%Y"}} <a href="/">{{ site.sitedomain }}</a>
         </small></p>
       </footer>
 

@@ -139,3 +139,43 @@ background: #ff0000;
 color: white;
 background: #83BF73;
 }
+
+/*------------------------------------
+* 响应式适配（手机 / 平板）
+* --------------------------------- */
+@media screen and (max-width: 900px) {
+  #container {
+    width: auto;
+    max-width: 100%;
+    margin: 1em auto;
+    padding: 0 1em;
+  }
+  nav {
+    float: none;
+    width: auto;
+    margin: 0 0 1em;
+    padding: 0;
+    text-align: center;
+    border-bottom: 1px solid #ccc;
+  }
+  nav a {
+    display: inline-block;
+    padding: .5em .8em;
+  }
+  .content img {
+    max-width: 100%;
+  }
+}
+
+@media screen and (max-width: 600px) {
+  body { font-size: 13px; }
+  .content { font-size: 15px; line-height: 1.7; }
+  header h1 { font-size: 1.4em; }
+  nav { font-size: 1em; }
+  nav a { padding: .4em .5em; }
+  li { padding: .2em 0 .2em 1em; }
+  pre, code { font-size: 12px; }
+  pre { overflow-x: auto; word-break: normal; white-space: pre; }
+  table { display: block; overflow-x: auto; }
+  .paginator { font-size: 13px; }
+}

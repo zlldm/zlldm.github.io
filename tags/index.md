@@ -31,4 +31,4 @@ $.fn.tagcloud.defaults = {
 $(function () {
     $('#tag_cloud a').tagcloud();
 });
-</script>首页123
+</script>

@@ -55,7 +55,7 @@ td, th { padding:5px 10px; border:1px solid #886; background:#efefef; }
 }
 
 .listing-item time{color:#999999;}
-.listing-item .excerpt{color:#888;font-size:.85em;line-height:1.6;margin:.2em 0 .4em;}
+.listing-item .excerpt{color:#888;font-size:14px;line-height:1.6;margin:.2em 0 .4em;}
 .listing-seperator{color:#888;font-weight:normal;font-size:.9em;letter-spacing:.05em;padding-top:1.2em;margin-top:.8em;border-top:1px solid #eee;}
 .meta{font-size:12px;color:#888;}
 .pageNav{font-weight:bold;font-size:17px;}
@@ -179,6 +179,7 @@ background: #dd0000;
 @media screen and (max-width: 600px) {
   body { font-size: 13px; }
   .content { font-size: 15px; line-height: 1.7; }
+  .listing-item .excerpt { font-size: 12px; }
   header h1 { font-size: 1.4em; }
   nav { font-size: 1em; }
   nav a { padding: .4em .5em; }

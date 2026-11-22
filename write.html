@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="写作">
+<meta name="theme-color" content="#ffffff">
+<title>写文章 · 走累了的猫</title>
+<style>
+:root{--ink:#2C3E50;--muted:#888;--red:#dd0000;--line:#e2e0e0;}
+*{box-sizing:border-box;}
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%;}
+body{margin:0 auto;padding:20px 16px 40px;max-width:680px;background:#fff;color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;font-size:16px;line-height:1.6;-webkit-text-size-adjust:100%;}
+h1{font-size:1.5em;margin:0 0 2px;}
+.sub{color:var(--muted);font-size:13px;margin:0 0 18px;}
+.tip{background:#fafafa;border-left:3px solid var(--red);padding:10px 12px;font-size:13px;color:#666;margin-bottom:22px;}
+.field{margin-bottom:18px;}
+label{display:block;font-size:14px;font-weight:600;margin-bottom:6px;}
+input[type=text],input[type=password],input[type=date],textarea{width:100%;font:inherit;font-size:16px;color:var(--ink);background:#fff;border:1px solid var(--line);border-radius:3px;padding:11px 12px;-webkit-appearance:none;appearance:none;}
+textarea{min-height:46vh;resize:vertical;line-height:1.7;}
+input:focus,textarea:focus{outline:2px solid rgba(221,0,0,.32);border-color:var(--red);}
+.help{font-size:12px;color:var(--muted);margin:5px 0 0;}
+.row{display:flex;gap:8px;}
+.row input{flex:1;min-width:0;}
+button{font:inherit;font-size:15px;cursor:pointer;border:1px solid var(--line);border-radius:3px;background:#fff;color:var(--ink);padding:11px 14px;-webkit-tap-highlight-color:transparent;}
+button:active{opacity:.65;}
+button:disabled{opacity:.5;cursor:default;}
+#toggleToken{white-space:nowrap;}
+#image{font-size:13px;max-width:100%;}
+.publish-bar{position:sticky;bottom:0;background:#fff;border-top:1px solid var(--line);padding:12px 0 calc(12px + env(safe-area-inset-bottom));margin-top:10px;}
+#publish{width:100%;background:var(--red);color:#fff;border-color:var(--red);font-size:17px;font-weight:600;padding:15px;border-radius:3px;}
+#status{font-size:13px;min-height:20px;margin-top:8px;text-align:center;}
+.ok{color:#2e7d32;}
+.err{color:var(--red);}
+#result{font-size:14px;line-height:1.7;margin:0 0 18px;padding:0;}
+#result:not(:empty){background:#f4f9f4;border:1px solid #d8ebd8;padding:12px;border-radius:3px;}
+a{color:var(--red);}
+small{color:var(--muted);}
+</style>
+</head>
+<body>
+  <h1>写文章</h1>
+  <p class="sub">走累了的猫 · 手机写作</p>
+
+  <div class="tip">
+    首次使用：Safari 打开本页后点底部分享按钮 → 「添加到主屏幕」，之后从桌面图标进入。
+    <strong>请从主屏幕图标里填写 Token</strong>（和 Safari 的存储相互独立）。Token 只存在本机浏览器，不会上传到任何服务器。
+  </div>
+
+  <div id="result"></div>
+
+  <div class="field">
+    <label for="token">GitHub Token</label>
+    <div class="row">
+      <input type="password" id="token" placeholder="github_pat_…" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false">
+      <button id="toggleToken" type="button">显示</button>
+    </div>
+    <p class="help">细粒度 PAT，仅授权本仓库 Contents 读写；只在你的手机本地保存。请勿在公共设备使用。</p>
+  </div>
+
+  <div class="field">
+    <label for="title">标题 <span style="color:#dd0000">*</span></label>
+    <input type="text" id="title" placeholder="文章标题">
+  </div>
+
+  <div class="field">
+    <label for="slug">网址别名（可选）</label>
+    <input type="text" id="slug" placeholder="如 newyear2026，留空自动生成" autocapitalize="off" autocorrect="off" spellcheck="false">
+    <p class="help">只用英文、数字、短横线；决定文章网址 /别名/。</p>
+  </div>
+
+  <div class="field">
+    <label for="date">发布日期</label>
+    <input type="date" id="date">
+  </div>
+
+  <div class="field">
+    <label for="cats">分类（可选）</label>
+    <input type="text" id="cats" placeholder="如：大事件；多个用逗号分隔">
+  </div>
+
+  <div class="field">
+    <label for="bodyInput">正文（支持 Markdown）<span style="color:#dd0000"> *</span></label>
+    <textarea id="bodyInput" placeholder="在这里写文章…"></textarea>
+    <p class="help" id="saved"></p>
+  </div>
+
+  <div class="field">
+    <label for="image">插入图片（从相册选择）</label>
+    <input type="file" id="image" accept="image/*">
+    <p class="help">图片自动压缩后上传，并插入到正文光标位置。</p>
+  </div>
+
+  <div class="publish-bar">
+    <button id="publish" type="button">发布到博客</button>
+    <div id="status"></div>
+  </div>
+
+<script>
+(function(){
+  'use strict';
+  var OWNER='zlldm',REPO='zlldm.github.io',BRANCH='master';
+  var API='https://api.github.com/repos/'+OWNER+'/'+REPO+'/contents/';
+  var SITE='https://www.zlldm.com/';
+  var K_TOKEN='zlldm_blog_token',K_DRAFT='zlldm_blog_draft';
+  var $=function(id){return document.getElementById(id);};
+
+  function pad(n){return n<10?'0'+n:''+n;}
+  function today(){var d=new Date();return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());}
+  function hm(){var d=new Date();return pad(d.getHours())+':'+pad(d.getMinutes());}
+  function setStatus(msg,cls){var e=$('status');e.textContent=msg;e.className=cls||'';}
+  function token(){return $('token').value.trim();}
+  function headers(){return {
+    'Authorization':'Bearer '+token(),
+    'Accept':'application/vnd.github+json',
+    'X-GitHub-Api-Version':'2022-11-28',
+    'Content-Type':'application/json'
+  };}
+  function utf8ToBase64(str){
+    var bytes=new TextEncoder().encode(str),bin='',chunk=0x8000;
+    for(var i=0;i<bytes.length;i+=chunk){bin+=String.fromCharCode.apply(null,bytes.subarray(i,i+chunk));}
+    return btoa(bin);
+  }
+
+  // ---- 草稿本地保存 ----
+  var timer;
+  function saveDraft(){
+    clearTimeout(timer);
+    timer=setTimeout(function(){
+      try{
+        localStorage.setItem(K_DRAFT,JSON.stringify({
+          title:$('title').value,slug:$('slug').value,date:$('date').value,
+          cats:$('cats').value,body:$('bodyInput').value
+        }));
+        $('saved').textContent='已自动保存 '+hm();
+      }catch(e){}
+    },500);
+  }
+  function loadDraft(){
+    try{
+      var d=JSON.parse(localStorage.getItem(K_DRAFT)||'null');
+      if(!d)return;
+      $('title').value=d.title||'';
+      $('slug').value=d.slug||'';
+      $('date').value=d.date||today();
+      $('cats').value=d.cats||'';
+      $('bodyInput').value=d.body||'';
+      if(d.title||d.body)$('saved').textContent='已恢复上次草稿';
+    }catch(e){}
+  }
+  function clearDraft(){
+    try{localStorage.removeItem(K_DRAFT);}catch(e){}
+    $('title').value='';$('slug').value='';$('cats').value='';$('bodyInput').value='';
+    $('date').value=today();$('saved').textContent='';
+  }
+
+  try{$('token').value=localStorage.getItem(K_TOKEN)||'';}catch(e){}
+  $('token').addEventListener('input',function(){
+    try{localStorage.setItem(K_TOKEN,$('token').value.trim());}catch(e){}
+  });
+  $('toggleToken').addEventListener('click',function(){
+    var t=$('token'),show=t.type==='password';
+    t.type=show?'text':'password';
+    $('toggleToken').textContent=show?'隐藏':'显示';
+  });
+  ['title','slug','date','cats','bodyInput'].forEach(function(id){
+    $(id).addEventListener('input',saveDraft);
+    $(id).addEventListener('change',saveDraft);
+  });
+  loadDraft();
+  if(!$('date').value)$('date').value=today();
+
+  // ---- 图片：压缩后上传，插入 Markdown ----
+  function compress(file){
+    return new Promise(function(resolve,reject){
+      var img=new Image(),url=URL.createObjectURL(file);
+      img.onload=function(){
+        URL.revokeObjectURL(url);
+        var w=img.width,h=img.height,max=1600;
+        if(w>max||h>max){var r=Math.min(max/w,max/h);w=Math.round(w*r);h=Math.round(h*r);}
+        var c=document.createElement('canvas');c.width=w;c.height=h;
+        var ctx=c.getContext('2d');ctx.fillStyle='#fff';ctx.fillRect(0,0,w,h);
+        ctx.drawImage(img,0,0,w,h);
+        resolve(c.toDataURL('image/jpeg',0.82).split(',')[1]);
+      };
+      img.onerror=function(){URL.revokeObjectURL(url);reject(new Error('图片读取失败'));};
+      img.src=url;
+    });
+  }
+  function insertAtCursor(text){
+    var ta=$('bodyInput'),s=ta.selectionStart,e=ta.selectionEnd;
+    ta.value=ta.value.slice(0,s)+text+ta.value.slice(e);
+    ta.focus();ta.setSelectionRange(s+text.length,s+text.length);
+  }
+  $('image').addEventListener('change',async function(ev){
+    var file=ev.target.files&&ev.target.files[0];
+    ev.target.value='';
+    if(!file)return;
+    if(!token()){setStatus('请先填写 Token','err');return;}
+    setStatus('正在压缩并上传图片…');
+    try{
+      var b64=await compress(file);
+      var d=$('date').value||today();
+      var path='media/uploads/'+d+'/'+Date.now()+'.jpg';
+      var res=await fetch(API+path,{method:'PUT',headers:headers(),body:JSON.stringify({
+        message:'Upload image for blog post ('+d+')',content:b64,branch:BRANCH
+      })});
+      if(!res.ok){var j=await res.json().catch(function(){return{};});throw new Error(j.message||('HTTP '+res.status));}
+      var alt=file.name.replace(/\.[^.]+$/,'').replace(/[\[\]]/g,'');
+      insertAtCursor('\n\n!['+alt+'](/'+path+')\n\n');
+      saveDraft();
+      setStatus('图片已上传并插入正文','ok');
+    }catch(err){setStatus('图片上传失败：'+err.message,'err');}
+  });
+
+  // ---- 发布 ----
+  $('publish').addEventListener('click',async function(){
+    var title=$('title').value.trim(),body=$('bodyInput').value.trim();
+    var d=$('date').value||today(),slug=$('slug').value.trim();
+    if(!token()){setStatus('请先填写 Token','err');return;}
+    if(!title){setStatus('请填写标题','err');$('title').focus();return;}
+    if(!body){setStatus('正文还是空的','err');$('bodyInput').focus();return;}
+    if(!/^\d{4}-\d{2}-\d{2}$/.test(d)){setStatus('日期格式应为 2026-11-22','err');return;}
+
+    if(!slug)slug='p'+Date.now().toString(36);
+    slug=slug.toLowerCase().replace(/[^a-z0-9\-_]+/g,'-').replace(/^-+|-+$/g,'')||('p'+Date.now().toString(36));
+    var cats=$('cats').value.split(/[,，、\s]+/).map(function(s){return s.trim();}).filter(Boolean);
+    var safeTitle=title.replace(/\\/g,'\\\\').replace(/"/g,'\\"');
+    var fm='---\nlayout: post\ntitle: "'+safeTitle+'"\n';
+    if(cats.length===1)fm+='categories: "'+cats[0].replace(/"/g,'\\"')+'"\n';
+    else if(cats.length>1)fm+='categories: ['+cats.map(function(c){return '"'+c.replace(/"/g,'\\"')+'"';}).join(', ')+']\n';
+    fm+='---\n\n';
+    var content=fm+body+'\n';
+    var filename=d+'-'+slug+'.md';
+
+    $('result').innerHTML='';
+    setStatus('正在发布…');
+    $('publish').disabled=true;
+    try{
+      var res=await fetch(API+'_posts/'+encodeURIComponent(filename),{method:'PUT',headers:headers(),body:JSON.stringify({
+        message:'New post: '+title,content:utf8ToBase64(content),branch:BRANCH
+      })});
+      var data=await res.json().catch(function(){return{};});
+      if(!res.ok)throw new Error(data.message||('HTTP '+res.status));
+      clearDraft();
+      var url=SITE+slug+'/';
+      $('result').innerHTML='发布成功：<a href="'+url+'" target="_blank" rel="noopener">'+url+'</a><br><small>GitHub Pages 通常 1–2 分钟后上线。</small>';
+      setStatus('发布成功','ok');
+      window.scrollTo(0,0);
+    }catch(err){
+      setStatus('发布失败：'+err.message+'（草稿已保存在本机）','err');
+    }finally{
+      $('publish').disabled=false;
+    }
+  });
+})();
+</script>
+</body>
+</html>
